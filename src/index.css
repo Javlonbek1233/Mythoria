@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cormorant Garamond", serif;
+  --font-serif: "Cinzel", serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-myth-gold: #c5a059;
+  --color-myth-dark: #0d0b10;
+  --color-myth-accent: #4a1d96;
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-myth-dark)] text-gray-200 font-sans selection:bg-purple-900 selection:text-white overflow-x-hidden;
+    background-image: radial-gradient(circle at 2px 2px, #c5a059 1px, transparent 0);
+    background-size: 40px 40px;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-serif tracking-widest uppercase;
+  }
+}
+
+.glow-gold {
+  box-shadow: 0 0 15px rgba(197, 160, 89, 0.3);
+}
+
+.glow-purple {
+  box-shadow: 0 0 20px rgba(74, 29, 150, 0.4);
+}
+
+.magic-gradient {
+  background: radial-gradient(circle at center, #2e1065 0%, #0d0b10 100%);
+}
+
+.ornament {
+  @apply border border-myth-gold/30 relative bg-[#120f1a];
+}
+
+.ornament::before, .ornament::after {
+  content: '';
+  @apply absolute w-2 h-2 border border-myth-gold bg-[var(--color-myth-dark)] rotate-45;
+}
+
+.ornament-tl::before { top: -5px; left: -5px; }
+.ornament-tr::after { top: -5px; right: -5px; }
+.ornament-bl::before { bottom: -5px; left: -5px; }
+.ornament-br::after { bottom: -5px; right: -5px; }
+
+.fantasy-card {
+  @apply bg-[#120f1a] border border-myth-gold/20 p-6 transition-all duration-300;
+}
+
+.fantasy-card:hover {
+  @apply border-myth-gold/50 bg-[#1a1625];
+}
+
+.medieval-text {
+  @apply font-serif text-[10px] tracking-[0.2em] uppercase;
+}

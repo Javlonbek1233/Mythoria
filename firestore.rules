@@ -1,0 +1,101 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Entity Validations ---
+
+    function isValidUser(data) {
+      return data.uid is string && data.uid.size() <= 128 &&
+             data.displayName is string && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() <= 100 &&
+             data.level is int && data.level >= 1 &&
+             data.gold is int && data.gold >= 0 &&
+             data.xp is int && data.xp >= 0 &&
+             data.faction in ['Eldoria', 'Shadowfen', 'Ironhold', 'Mistral'] &&
+             data.createdAt is timestamp;
+    }
+
+    function isValidMessage(data) {
+      return data.id is string && data.id.size() <= 128 &&
+             data.senderId == request.auth.uid &&
+             data.text is string && data.text.size() <= 5000 &&
+             data.type in ['system', 'npc', 'player'] &&
+             data.timestamp is timestamp;
+    }
+
+    // --- Collection Matches ---
+
+    // USERS: Only users can read/write their own profiles. No blanket reads.
+    match /users/{userId} {
+      allow get: if isOwner(userId);
+      allow list: if false; // Users cannot list other users
+      
+      allow create: if isOwner(userId) && 
+                      isValidId(userId) && 
+                      isValidUser(incoming()) &&
+                      incoming().uid == userId &&
+                      incoming().createdAt == request.time;
+
+      allow update: if isOwner(userId) &&
+                      isValidUser(incoming()) &&
+                      incoming().uid == existing().uid &&
+                      incoming().createdAt == existing().createdAt &&
+                      (
+                        // Action: Update Stats
+                        incoming().diff(existing()).affectedKeys().hasOnly(['level', 'gold', 'xp', 'displayName', 'faction'])
+                      );
+    }
+
+    // CHARACTERS: Publicly readable entries. Admin-only writes.
+    match /characters/{characterId} {
+      allow get: if true;
+      allow list: if true; // Public encyclopedia
+      allow write: if false; // Reserved for admin console (not implemented in client)
+    }
+
+    // QUESTS: Publicly readable. Admin-only writes.
+    match /quests/{questId} {
+      allow get: if true;
+      allow list: if true;
+      allow write: if false;
+    }
+
+    // MESSAGES: Users can create messages and read systemic ones.
+    match /messages/{messageId} {
+      allow get: if isSignedIn();
+      allow list: if isSignedIn(); // In a real app, this would be filtered by session/channel
+      
+      allow create: if isSignedIn() && 
+                      isValidId(messageId) && 
+                      isValidMessage(incoming()) &&
+                      incoming().timestamp == request.time;
+      
+      allow update, delete: if false; // Messages are immutable for players
+    }
+  }
+}

@@ -1,0 +1,82 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about the player and their stats.",
+      "type": "object",
+      "properties": {
+        "uid": { "type": "string" },
+        "displayName": { "type": "string" },
+        "email": { "type": "string" },
+        "level": { "type": "integer" },
+        "gold": { "type": "integer" },
+        "xp": { "type": "integer" },
+        "faction": { "type": "string", "enum": ["Eldoria", "Shadowfen", "Ironhold", "Mistral"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["uid", "displayName", "email", "level", "gold", "xp", "faction"]
+    },
+    "Character": {
+      "title": "Mythical Character",
+      "description": "A character or creature in the encyclopedia.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "lore": { "type": "string" },
+        "element": { "type": "string", "enum": ["Fire", "Water", "Earth", "Air", "Light", "Shadow"] },
+        "rarity": { "type": "string", "enum": ["Common", "Rare", "Epic", "Legendary"] },
+        "imageUrl": { "type": "string" }
+      },
+      "required": ["id", "name", "title", "description", "lore", "element", "rarity"]
+    },
+    "Quest": {
+      "title": "Quest",
+      "description": "A mission for the player.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "reward": { "type": "object", "properties": { "gold": { "type": "integer" }, "xp": { "type": "integer" } } },
+        "difficulty": { "type": "string", "enum": ["Easy", "Normal", "Hard", "Mythic"] },
+        "isActive": { "type": "boolean" }
+      },
+      "required": ["id", "title", "description", "reward", "difficulty", "isActive"]
+    },
+    "Message": {
+      "title": "Message",
+      "description": "Lore or NPC dialogue messages.",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "senderId": { "type": "string" },
+        "senderName": { "type": "string" },
+        "text": { "type": "string" },
+        "timestamp": { "type": "string", "format": "date-time" },
+        "type": { "type": "string", "enum": ["system", "npc", "player"] }
+      },
+      "required": ["id", "senderId", "senderName", "text", "timestamp", "type"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profiles and stats."
+    },
+    "/characters/{characterId}": {
+      "schema": "Character",
+      "description": "Mythical characters and encyclopedia entries."
+    },
+    "/quests/{questId}": {
+      "schema": "Quest",
+      "description": "Global or user-specific quests."
+    },
+    "/messages/{messageId}": {
+      "schema": "Message",
+      "description": "Chat and lore messages."
+    }
+  }
+}
